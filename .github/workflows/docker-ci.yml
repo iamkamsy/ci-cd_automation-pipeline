@@ -1,0 +1,45 @@
+name: Docker CI
+
+on:
+  push:
+    paths:
+      - "backend/**"
+  pull_request:
+    paths:
+      - "backend/**"
+
+jobs:
+  build-and-test:
+    name: Build and Smoke Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t taskmanager-backend-ci ./backend
+
+      - name: Run container
+        run: |
+          docker run -d \
+            --name taskmanager-backend-ci \
+            -p 5000:5000 \
+            -e TESTING=true \
+            -e SECRET_KEY=test-secret \
+            -e MONGO_URI=mongodb://localhost:27017 \
+            taskmanager-backend-ci
+
+      - name: Wait for container to be ready
+        run: sleep 5
+
+      - name: Health check
+        run: |
+          curl --fail --retry 5 --retry-delay 2 --retry-connrefused \
+            http://localhost:5000/health
+
+      - name: Stop and remove container
+        if: always()
+        run: |
+          docker stop taskmanager-backend-ci || true
+          docker rm taskmanager-backend-ci || true

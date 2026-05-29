@@ -99,13 +99,6 @@ infra/terraform/
   terraform.tfvars.example
   README.md
 
-README.md
-documentation.md
-```
-
-Planned DevOps paths still to add:
-
-```text
 .github/workflows/
   terraform-plan.yml
   terraform-apply.yml
@@ -113,6 +106,13 @@ Planned DevOps paths still to add:
   frontend-ci-cd.yml
   docker-ci.yml
 
+README.md
+documentation.md
+```
+
+Planned DevOps paths still to add:
+
+```text
 ansible/
   inventory.ini
   playbook.yml
@@ -177,7 +177,9 @@ Use `infra/terraform/terraform.tfvars.example` as the template for local values.
 
 ### Step 3: GitHub Actions
 
-Planned workflows:
+Status: Implemented.
+
+Current workflows:
 
 | Workflow | Trigger | Purpose |
 |---|---|---|
@@ -187,6 +189,13 @@ Planned workflows:
 | `docker-ci.yml` | PRs and pushes touching backend Docker files | Build backend image, run container, curl `/health`, stop container |
 | `frontend-ci-cd.yml` | PRs and pushes touching `frontend/**` | Install, build, and deploy frontend on `main` |
 
+Deployment gates:
+
+- Pull requests run validation only.
+- Backend deploy runs only on `push` to `main` when `AZURE_WEBAPP_NAME` and `AZURE_WEBAPP_PUBLISH_PROFILE` are configured.
+- Frontend deploy runs only on `push` to `main` when `AZURE_STATIC_WEB_APPS_API_TOKEN` is configured.
+- Docker CI never pushes images and never deploys to Azure.
+
 Required GitHub secrets:
 
 ```text
@@ -195,9 +204,18 @@ AZURE_CLIENT_SECRET
 AZURE_SUBSCRIPTION_ID
 AZURE_TENANT_ID
 MONGO_URI
+FLASK_SECRET_KEY
 AZURE_WEBAPP_PUBLISH_PROFILE
 AZURE_STATIC_WEB_APPS_API_TOKEN
 ```
+
+Required GitHub repository variables:
+
+```text
+AZURE_WEBAPP_NAME
+```
+
+`AZURE_WEBAPP_NAME` must match the Terraform `app_service_name` value.
 
 ### Step 4: Ansible Local Setup
 
@@ -267,6 +285,7 @@ Backend source deployment will use:
 
 ```text
 AZURE_WEBAPP_PUBLISH_PROFILE
+AZURE_WEBAPP_NAME
 ```
 
 Frontend Static Web Apps deployment will use:
@@ -275,7 +294,7 @@ Frontend Static Web Apps deployment will use:
 AZURE_STATIC_WEB_APPS_API_TOKEN
 ```
 
-Application secrets such as `MONGO_URI` must remain in GitHub Secrets and Azure App Service app settings. They should never be committed.
+Application secrets such as `MONGO_URI` and `FLASK_SECRET_KEY` must remain in GitHub Secrets and Azure App Service app settings. They should never be committed.
 
 ## Backend Runtime Notes
 

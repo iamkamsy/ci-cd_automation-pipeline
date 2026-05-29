@@ -87,6 +87,25 @@ Mid-session 401s returned cryptic error messages. Added `SessionExpiredError` cl
 
 ---
 
+## DevOps Step 3 - GitHub Actions workflows
+
+**Terraform plan and apply workflows added**
+Added `terraform-plan.yml` for pull requests touching `infra/terraform/**` and `terraform-apply.yml` for pushes to `main`. Both workflows use Azure service principal secrets, pass Terraform secrets through `TF_VAR_mongo_uri` and `TF_VAR_secret_key`, and use `FLASK_SECRET_KEY` as the GitHub secret backing the Flask `SECRET_KEY`.
+
+**Backend CI/CD workflow added**
+Added `backend-ci-cd.yml` to install Python 3.11 dependencies, run pytest with test-safe environment variables, and deploy the backend to Azure App Service only on pushes to `main`. Deployment is skipped unless `AZURE_WEBAPP_NAME` and `AZURE_WEBAPP_PUBLISH_PROFILE` are configured.
+
+**Docker validation workflow added**
+Added `docker-ci.yml` to build the backend Docker image, run it locally in GitHub Actions, call `/health`, and always clean up the container. Docker remains CI validation only; no image is pushed to Azure Container Registry or deployed to Azure.
+
+**Frontend CI/CD workflow added**
+Added `frontend-ci-cd.yml` to install frontend dependencies with `npm ci`, run the Vite build, and deploy to Azure Static Web Apps only on pushes to `main` when `AZURE_STATIC_WEB_APPS_API_TOKEN` is configured.
+
+**Pull requests kept validation-only**
+All deploy steps are gated away from pull requests so PRs validate code and infrastructure without mutating Azure resources.
+
+---
+
 ## DevOps Step 2 - Terraform free-tier infrastructure
 
 **Terraform infrastructure added for Azure free-tier deployment**
