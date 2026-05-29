@@ -14,8 +14,9 @@ def init_db(app):
     )
     db = _client[os.environ.get("DB_NAME", "taskmanager")]
     app.extensions["mongo_db"] = db
-    db.users.create_index([("email", ASCENDING)], unique=True)
-    db.users.create_index([("username", ASCENDING)], unique=True)
+    if not app.config.get("TESTING"):
+        db.users.create_index([("email", ASCENDING)], unique=True)
+        db.users.create_index([("username", ASCENDING)], unique=True)
 
 
 def get_db():

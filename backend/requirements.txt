@@ -5,3 +5,4 @@ bcrypt==4.2.1
 python-dotenv==1.0.1
 certifi
 gunicorn==23.0.0
+pytest
