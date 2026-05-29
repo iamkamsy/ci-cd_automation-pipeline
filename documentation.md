@@ -80,22 +80,17 @@ Current important paths:
 backend/
   app.py
   db.py
+  Dockerfile
   routes/
   models/
   requirements.txt
+  tests/
 
 frontend/
   package.json
   src/
   public/
 
-README.md
-documentation.md
-```
-
-Planned DevOps paths:
-
-```text
 infra/terraform/
   providers.tf
   main.tf
@@ -104,6 +99,13 @@ infra/terraform/
   terraform.tfvars.example
   README.md
 
+README.md
+documentation.md
+```
+
+Planned DevOps paths still to add:
+
+```text
 .github/workflows/
   terraform-plan.yml
   terraform-apply.yml
@@ -119,6 +121,8 @@ ansible/
 ## Implementation Phases
 
 ### Step 1: Backend Deployment Foundation
+
+Status: Implemented.
 
 Purpose:
 
@@ -136,6 +140,8 @@ Important design notes:
 
 ### Step 2: Terraform Infrastructure
 
+Status: Implemented.
+
 Purpose:
 
 - Provision the Azure Resource Group.
@@ -145,6 +151,7 @@ Purpose:
 - Provision Azure Static Web Apps Free if supported cleanly by Terraform.
 - Add tags for cost tracking.
 - Add outputs for deployed URLs and resource names.
+- Add an optional resource-group budget alert guarded by `enable_budget_alert`.
 
 Terraform safety requirements:
 
@@ -153,10 +160,20 @@ Terraform safety requirements:
 - `always_on` must be `false`.
 - No paid SKUs should be present.
 - No remote state backend by default.
+- Budget alerts must use a stable `budget_start_date`, not a dynamic timestamp.
 
 Remote state note:
 
 This personal project uses local Terraform state by default to avoid provisioning an Azure Storage Account just for state. A production project should use remote state with locking, access controls, and secure state storage.
+
+Current Terraform files live in `infra/terraform/`. The local variables file is intentionally excluded from Git:
+
+```text
+infra/terraform/terraform.tfvars
+infra/terraform/*.tfstate
+```
+
+Use `infra/terraform/terraform.tfvars.example` as the template for local values.
 
 ### Step 3: GitHub Actions
 
@@ -282,6 +299,8 @@ SESSION_COOKIE_SECURE
 ```
 
 The `/health` endpoint is intended for lightweight CI and smoke-test checks. It should not require a database round trip.
+
+The backend Dockerfile is for CI validation only. Azure deployment remains source-based App Service deployment, not container deployment.
 
 ## Frontend Runtime Notes
 

@@ -84,3 +84,43 @@ Mid-session 401s returned cryptic error messages. Added `SessionExpiredError` cl
 
 **Hardcoded config values**
 `SESSION_COOKIE_SECURE=False`, `CORS origins=["http://localhost:5173"]`, and `debug=True` were all hardcoded. Any accidental deploy would have broken sessions, blocked the frontend, and exposed the debug console. Fixed by reading all three from environment variables with safe local defaults.
+
+---
+
+## DevOps Step 2 - Terraform free-tier infrastructure
+
+**Terraform infrastructure added for Azure free-tier deployment**
+Added `infra/terraform/` with AzureRM provider configuration, Resource Group, Linux App Service Plan, Linux Web App, Azure Static Web App, outputs, variables, example tfvars, and Terraform-specific README documentation.
+
+**Free-tier guardrails added**
+The App Service Plan SKU is validated to `F1`, the Static Web App SKU tier and size are validated to `Free`, and the Linux Web App explicitly sets `always_on = false` because Free F1 does not support Always On.
+
+**Local Terraform state kept intentional**
+Remote state is not configured by default to avoid provisioning extra Azure Storage resources for this personal project. The Terraform docs now explain that production should use remote state with locking.
+
+**Optional budget alert made stable**
+The optional Azure resource-group budget alert uses an explicit `budget_start_date` variable instead of a dynamic timestamp, avoiding recurring Terraform diffs. Budget alert email is guarded so it cannot be empty when the alert is enabled.
+
+**Terraform state and secrets ignored**
+Updated `.gitignore` to exclude local `.terraform/`, `terraform.tfvars`, and Terraform state files so secrets and local state do not get committed.
+
+---
+
+## DevOps Step 1 - Backend deployment foundation
+
+**Backend health check added**
+Added a `/health` endpoint returning `{"status": "ok"}` so CI workflows and deployment smoke checks can verify the Flask API without depending on MongoDB.
+
+**Backend test foundation added**
+Added `pytest` and a health endpoint test under `backend/tests/`, with test-mode environment handling so the app can be imported without real production secrets.
+
+**Production secret fallback removed**
+The Flask `SECRET_KEY` is required outside test mode. This prevents production from silently running with a known default secret.
+
+**Docker CI validation support added**
+Added `backend/Dockerfile` using `python:3.11-slim` and Gunicorn on port 5000. This is for CI validation only; Azure deployment remains source-based App Service deployment.
+
+**Backend environment example added**
+Added `backend/.env.example` with placeholders for MongoDB, Flask secret, database name, CORS origins, production mode, and secure-cookie settings.
+
+---
