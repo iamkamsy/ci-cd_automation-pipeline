@@ -1,0 +1,34 @@
+# Copy this file to terraform.tfvars and fill in every value marked REPLACE.
+# Never commit terraform.tfvars — it is listed in .gitignore.
+
+project_name        = "azure-devops-cicd"
+environment         = "dev"
+location            = "East US"
+
+resource_group_name   = "taskmanager-rg"
+app_service_plan_name = "taskmanager-plan"
+app_service_name      = "taskmanager-backend-REPLACE-WITH-UNIQUE-NAME"
+
+# SKU values are locked to free tier by variable validation.
+app_service_sku         = "F1"
+static_web_app_name     = "taskmanager-frontend-REPLACE-WITH-UNIQUE-NAME"
+static_web_app_sku_tier = "Free"
+static_web_app_sku_size = "Free"
+
+# REPLACE with your actual MongoDB Atlas (or other) connection string.
+mongo_uri = "mongodb+srv://REPLACE_USER:REPLACE_PASSWORD@REPLACE_HOST/taskmanager?retryWrites=true&w=majority"
+
+# REPLACE with a strong random value (e.g. `openssl rand -hex 32`).
+secret_key = "REPLACE_WITH_STRONG_RANDOM_SECRET"
+
+# Optional budget alert.
+# Set enable_budget_alert = true, then fill in budget_alert_email and
+# budget_start_date (first day of the month billing should begin, RFC-3339).
+# budget_alert_email is required and must be non-empty when enable_budget_alert = true.
+enable_budget_alert = false
+budget_amount_usd   = 5
+budget_alert_email  = "REPLACE_WITH_YOUR_EMAIL"
+budget_start_date   = "2025-01-01T00:00:00Z"
+
+# Optional: add extra tags merged with the default cost-policy tags.
+tags = {}
