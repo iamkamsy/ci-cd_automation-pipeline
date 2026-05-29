@@ -87,6 +87,22 @@ Mid-session 401s returned cryptic error messages. Added `SessionExpiredError` cl
 
 ---
 
+## DevOps Step 4 - Ansible local setup
+
+**Local-only Ansible inventory added**
+Added `ansible/inventory.ini` targeting only `localhost` with `ansible_connection=local`. No remote hosts, Azure VMs, or cloud provisioning targets were added.
+
+**Local setup playbook added**
+Added `ansible/playbook.yml` to create missing backend and frontend `.env.example` files with safe placeholders, optionally install backend Python dependencies into the active Python environment, and print local setup instructions.
+
+**Existing env examples protected**
+The playbook uses `force: false` for generated `.env.example` files so existing examples are not overwritten.
+
+**Validation note**
+Ansible syntax checking was performed by the user after installing `ansible-playbook`; earlier local tool attempts were blocked by the shell sandbox rather than by playbook syntax.
+
+---
+
 ## DevOps Step 3 - GitHub Actions workflows
 
 **Terraform plan and apply workflows added**

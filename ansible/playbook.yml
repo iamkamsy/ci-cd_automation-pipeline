@@ -1,0 +1,68 @@
+---
+- name: Local development setup
+  hosts: local
+  gather_facts: false
+
+  vars:
+    # Set to true to pip-install backend dependencies into the active Python environment.
+    # Does not create or manage a virtualenv - activate one first if desired.
+    install_backend_deps: false
+
+    backend_env_example_path: "{{ playbook_dir }}/../backend/.env.example"
+    frontend_env_example_path: "{{ playbook_dir }}/../frontend/.env.example"
+
+    backend_env_example_content: |
+      MONGO_URI=
+      SECRET_KEY=
+      DB_NAME=taskmanager
+      FLASK_ENV=production
+      CORS_ORIGINS=http://localhost:5173
+      SESSION_COOKIE_SECURE=false
+
+    frontend_env_example_content: |
+      # VITE_API_BASE_URL is reserved for future frontend API configuration.
+      # Uncomment and set this when the frontend reads the API base URL from the environment.
+      # VITE_API_BASE_URL=http://localhost:5000
+
+  tasks:
+    - name: Ensure backend/.env.example exists with placeholder values
+      copy:
+        dest: "{{ backend_env_example_path }}"
+        content: "{{ backend_env_example_content }}"
+        force: false  # Never overwrite an existing file
+
+    - name: Ensure frontend/.env.example exists with placeholder values
+      copy:
+        dest: "{{ frontend_env_example_path }}"
+        content: "{{ frontend_env_example_content }}"
+        force: false  # Never overwrite an existing file
+
+    - name: Install backend Python dependencies
+      when: install_backend_deps | bool
+      command:
+        cmd: python -m pip install -r backend/requirements.txt
+        chdir: "{{ playbook_dir }}/.."
+      changed_when: false
+
+    - name: Print local development setup instructions
+      debug:
+        msg:
+          - "========================================"
+          - "Local development setup instructions"
+          - "========================================"
+          - ""
+          - "Backend:"
+          - "  cd backend"
+          - "  python -m venv venv"
+          - "  Windows:       venv\\Scripts\\activate"
+          - "  macOS/Linux:   source venv/bin/activate"
+          - "  pip install -r requirements.txt"
+          - "  flask run"
+          - ""
+          - "Frontend:"
+          - "  cd frontend"
+          - "  npm install"
+          - "  npm run dev"
+          - ""
+          - "Copy backend/.env.example to backend/.env and fill in real values before running."
+          - "========================================"

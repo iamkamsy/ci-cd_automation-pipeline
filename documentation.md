@@ -106,16 +106,12 @@ infra/terraform/
   frontend-ci-cd.yml
   docker-ci.yml
 
-README.md
-documentation.md
-```
-
-Planned DevOps paths still to add:
-
-```text
 ansible/
   inventory.ini
   playbook.yml
+
+README.md
+documentation.md
 ```
 
 ## Implementation Phases
@@ -219,6 +215,8 @@ AZURE_WEBAPP_NAME
 
 ### Step 4: Ansible Local Setup
 
+Status: Implemented.
+
 Purpose:
 
 - Automate local development setup only.
@@ -227,6 +225,22 @@ Purpose:
 - Print setup instructions for the developer.
 
 Ansible will not create Azure VMs, configure remote servers, or deploy cloud infrastructure.
+
+Current Ansible files:
+
+```text
+ansible/inventory.ini
+ansible/playbook.yml
+```
+
+The inventory targets only `localhost` with a local connection. The playbook creates missing `.env.example` files without overwriting existing files, can optionally install backend dependencies into the active Python environment, and prints local setup instructions.
+
+Typical usage:
+
+```text
+ansible-playbook -i ansible/inventory.ini ansible/playbook.yml
+ansible-playbook -i ansible/inventory.ini ansible/playbook.yml -e install_backend_deps=true
+```
 
 ### Step 5: README and Interview Narrative
 
